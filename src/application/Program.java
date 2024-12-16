@@ -12,6 +12,7 @@ public class Program {
 		// O programa não conhece a implementação - injeção de dependência sem explicitar a implementação
 		SellerDao sellerDao = DaoFactory.createSellerDao();
 		
+		System.out.println("=== TEST 1: seller findByID =====");
 		Seller seller = sellerDao.findById(3);
 		
 		System.out.println(seller);

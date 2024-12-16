@@ -16,8 +16,10 @@ import model.entities.Seller;
 // Implementação JDBC do Seller DAO
 public class SellerDaoJDBC implements SellerDao{
 
+	// Não precisa fechar a conexão - porque o mesmo objeto serve para fazer mais de uma operação
 	private Connection conn;
 	
+	// DAO terá uma dependência com a conexão
 	public SellerDaoJDBC(Connection conn) {
 		this.conn = conn;
 	}
@@ -54,16 +56,8 @@ public class SellerDaoJDBC implements SellerDao{
 			rs = st.executeQuery();
 			if (rs.next()) { // Testa se houve algum resultado
 				// Se for verdadeiro, retorna uma tabela com os resultados
-				Department dep = new Department();
-				dep.setId(rs.getInt("DepartmentId"));
-				dep.setName(rs.getString("DepName"));
-				Seller obj = new Seller();
-				obj.setId(rs.getInt("Id"));
-				obj.setName(rs.getString("Name"));
-				obj.setEmail(rs.getString("Email"));
-				obj.setBirthDate(rs.getDate("BirthDate"));
-				obj.setBaseSalary(rs.getDouble("BaseSalary"));
-				obj.setDepartment(dep);
+				Department dep = instantiateDepartment(rs);
+				Seller obj = instantiateSeller(rs, dep);
 				return obj;
 			}
 			return null;
@@ -76,6 +70,25 @@ public class SellerDaoJDBC implements SellerDao{
 			DB.closeStatement(st);
 		}
 		
+	}
+
+	// Em um código muito verboso e cheio de linhas, é bom que façamos uma função para reaproveitarmos essa função
+	private Department instantiateDepartment(ResultSet rs) throws SQLException { // Apenas propagar exceção, pois já está sendo tratada no outro método
+		Department dep = new Department();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("DepName"));
+		return dep;
+	}
+	
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller obj = new Seller();
+		obj.setId(rs.getInt("Id"));
+		obj.setName(rs.getString("Name"));
+		obj.setEmail(rs.getString("Email"));
+		obj.setBirthDate(rs.getDate("BirthDate"));
+		obj.setBaseSalary(rs.getDouble("BaseSalary"));
+		obj.setDepartment(dep);
+		return obj;
 	}
 
 	@Override
